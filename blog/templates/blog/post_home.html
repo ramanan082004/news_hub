@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'blog/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<header class="p-3 bg-dark text-white">
+    <div class="row align-items-center">
+        <div class="col">
+            <a class="text-decoration-none text-light" href="{% url 'blog:index' %}">
+                <h3 class="mb-0">📰 News Hub</h3>
+            </a>
+        </div>
+        <div class="col">
+            <div class="d-flex justify-content-center gap-3">
+                <a class="text-light text-decoration-none" href="{% url 'blog:index' %}">Home</a>
+                <a class="text-light text-decoration-none" href="{% url 'blog:post_list' %}">All News</a>
+                <a class="text-light text-decoration-none" href="{% url 'blog:register' %}">Register</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<div class="bg-dark text-white py-5">
+    <div class="container text-center">
+        <h1 class="fw-bold">Welcome to News Hub</h1>
+        <p class="lead text-muted">Latest news, breaking stories, and more.</p>
+        <a href="{% url 'blog:index' %}" class="btn btn-danger mt-2">
+            Read Latest News →
+        </a>
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="container my-5">
+    <h2 class="border-start border-danger border-4 ps-2 mb-4">Browse by Category</h2>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <div style="font-size:32px">⚽</div>
+                <h5 class="mt-2">Sports</h5>
+                <a href="{% url 'blog:index' %}?q=sports" 
+                   class="btn btn-outline-danger btn-sm mt-2">View News</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <div style="font-size:32px">🏛️</div>
+                <h5 class="mt-2">Politics</h5>
+                <a href="{% url 'blog:index' %}?q=politics" 
+                   class="btn btn-outline-danger btn-sm mt-2">View News</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <div style="font-size:32px">💻</div>
+                <h5 class="mt-2">Technology</h5>
+                <a href="{% url 'blog:index' %}?q=technology" 
+                   class="btn btn-outline-danger btn-sm mt-2">View News</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <div style="font-size:32px">💼</div>
+                <h5 class="mt-2">Business</h5>
+                <a href="{% url 'blog:index' %}?q=business" 
+                   class="btn btn-outline-danger btn-sm mt-2">View News</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light p-3 mt-4">
+    <div class="text-center">
+        <span>© 2026 News Hub. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

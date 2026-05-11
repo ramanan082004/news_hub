@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'blog/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .ticker-wrapper { overflow: hidden; width: 100%; }
+        .ticker-track {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: ticker-scroll 30s linear infinite;
+            width: max-content;
+        }
+        .ticker-track:hover { animation-play-state: paused; }
+        @keyframes ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-item {
+            color: white; font-size: 20px; font-weight: 600;
+            text-decoration: none; padding: 0 32px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .ticker-item::before { content: "★"; font-size: 20px; }
+
+        /* Dark Mode */
+        body.dark-mode { background-color: #121212 !important; color: #ffffff !important; }
+        body.dark-mode .card { background-color: #1e1e1e !important; border-color: #333 !important; color: #ffffff !important; }
+        body.dark-mode .text-muted { color: #aaaaaa !important; }
+        body.dark-mode footer { background-color: #000000 !important; }
+        body.dark-mode .form-control { background-color: #2a2a2a !important; color: #fff !important; border-color: #444 !important; }
+        body.dark-mode h2 { color: #ffffff !important; }
+
+        /* Popup Animation */
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity:0; }
+            to   { transform: translateX(0); opacity:1; }
+        }
+    .goog-te-gadget, .goog-te-banner-frame, #goog-gt-tt { display:none !important; } body { top: 0 !important; }</style>
+</head>
+<body class="bg-light">
+
+<header class="p-3 bg-dark text-white">
+    <div class="row align-items-center">
+        <div class="col">
+            <a class="text-decoration-none text-light" href="{% url 'blog:index' %}">
+                <h3 class="mb-0">📰 News Hub 2026</h3>
+            </a>
+        </div>
+        <div class="col">
+            <div class="d-flex justify-content-center gap-3">
+                <a class="text-light text-decoration-none" href="{% url 'blog:index' %}">Home</a>
+                <a class="text-light text-decoration-none" href="{% url 'blog:post_list' %}">All News</a>
+                <a class="text-light text-decoration-none" href="{% url 'blog:register' %}">Register</a>
+                <a href="{% url 'blog:login' %}" class="btn btn-outline-light btn-sm px-3">
+                    <i class="fa fa-sign-in-alt me-1"></i> Login
+                </a>
+                <a href="{% url 'blog:logout' %}" class="btn btn-outline-danger btn-sm px-3">
+                    <i class="fa fa-sign-out-alt me-1"></i> Logout
+                </a>
+                
+                <!-- 🌐 Language Translator -->
+                <div class="lang-widget-wrap" id="langWidgetWrap"><button class="lang-toggle-btn" onclick="toggleLangPanel()">🌐 <span id="langActiveName">Language</span> ▾</button><div class="lang-dropdown" id="langDropdown"><div class="lang-quick-row" id="langQuickRow"><button class="lang-flag-btn active" data-lang="ta">தமிழ்</button><button class="lang-flag-btn" data-lang="en">English</button><button class="lang-flag-btn" data-lang="hi">हिन्दी</button><button class="lang-flag-btn" data-lang="te">తెలుగు</button><button class="lang-flag-btn" data-lang="ml">മലയാളം</button><button class="lang-flag-btn" data-lang="kn">ಕನ್ನಡ</button><button class="lang-flag-btn" data-lang="ar">عربية</button></div><select class="lang-select-full" id="langSelectFull" onchange="applyLanguage(this.value)"><option value="ta">தமிழ்</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="te">తెలుగు</option><option value="ml">മലയാളം</option><option value="ar">العربية</option><option value="zh">中文</option><option value="fr">Français</option></select></div></div><div id="google_translate_element" style="display:none;"></div>
+                {% if request.user.is_authenticated %}
+<a href="{% url 'blog:profile' %}" style="
+    width:36px; height:36px; border-radius:50%;
+    background:#e63946; color:white;
+    display:inline-flex; align-items:center;
+    justify-content:center; font-weight:bold;
+    font-size:13px; text-decoration:none;">
+    {{ request.user.username|slice:":2"|upper }}
+</a>
+{% endif %}
+                <button onclick="toggleDark()" class="btn btn-outline-warning btn-sm px-3" id="darkBtn">
+                    🌙 Dark
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="bg-danger text-white py-2 px-6">
+    <div class="container-fluid d-flex align-items-center">
+        <span class="badge bg-white text-danger py-6 fw-bold me-3 flex-shrink-0">BREAKING</span>
+        <div class="ticker-wrapper">
+            <div class="ticker-track">
+                {% for post in breaking_posts %}
+                    <a href="{% url 'blog:detail' post.id %}" class="ticker-item">{{ post.title }}</a>
+                {% empty %}
+                    <span class="ticker-item">Welcome to News Hub 2026</span>
+                {% endfor %}
+                {% for post in breaking_posts %}
+                    <a href="{% url 'blog:detail' post.id %}" class="ticker-item">{{ post.title }}</a>
+                {% empty %}
+                    <span class="ticker-item">Welcome to News Hub 2026</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid mt-3">
+    <div class="row my-2 align-items-center">
+        <div class="col">
+            <h2 style="border-left: 10px solid #d32f2f; padding-left: 10px; color: #1a1a1a;">Latest News</h2>
+        </div>
+        <div class="col-3">
+            <form method="GET" action="{% url 'blog:index' %}">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search news..."
+                        name="q" value="{{ query }}">
+                    <button class="btn btn-danger" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row m-3">
+        {% for post in posts %}
+        <div class="col-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if post.image %}
+                                <img src="{{ post.image.url }}"
+                                     class="img-fluid rounded"
+                                     alt="{{ post.title }}"
+                                     style="width:100%; height:90px; object-fit:cover;">
+                            {% else %}
+                                <img src="https://via.placeholder.com/300"
+                                     class="img-fluid rounded"
+                                     alt="no image"
+                                     style="width:100%; height:90px; object-fit:cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">
+                                {{ post.content|truncatewords:10 }}
+                            </p>
+                            <small class="text-muted">
+                                {{ post.created_at|date:"d M Y" }}
+                            </small>
+                            <div class="mt-2">
+                                <a href="{% url 'blog:detail' post.id %}?tag={{ post.tag|default_if_none:'' }}"
+                                   class="text-danger fw-bold text-decoration-none">
+                                   Read More →
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5 text-muted">
+            {% if query %}
+                <h5>"{{ query }}" — எந்த news-உம் கிடைக்கவில்லை.</h5>
+            {% else %}
+                <h5>இன்னும் news இல்லை. Admin panel-ல் add பண்ணுங்க!</h5>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<footer class="bg-dark text-light p-3 mt-4">
+    <div class="text-center">
+        <span>© 2026 News Hub. All rights reserved.</span>
+    </div>
+</footer>
+
+<!-- Breaking News Popup -->
+<div id="breakingPopup" style="
+    display:none;
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    width:320px;
+    background:#fff;
+    border-left:5px solid #e63946;
+    border-radius:8px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.2);
+    z-index:9999;
+    padding:15px;
+    animation: slideIn 0.5s ease;
+">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="badge bg-danger">🔴 BREAKING</span>
+        <button onclick="closePopup()" style="background:none;border:none;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <p id="popupTitle" style="font-weight:600;color:#1a1a1a;margin:0;"></p>
+    <a id="popupLink" href="#" class="text-danger fw-bold text-decoration-none mt-2 d-block">Read More →</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Dark Mode
+    if(localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkBtn').textContent = '☀️ Light';
+    }
+    function toggleDark() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        document.getElementById('darkBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+    }
+
+    // Breaking News Popup
+    const breakingNews = [
+        {% for post in breaking_posts %}
+        { title: "{{ post.title }}", url: "{% url 'blog:detail' post.id %}" },
+        {% endfor %}
+    ];
+
+    let currentIndex = 0;
+
+    function showPopup() {
+        if(breakingNews.length === 0) return;
+        const news = breakingNews[currentIndex];
+        document.getElementById('popupTitle').textContent = news.title;
+        document.getElementById('popupLink').href = news.url;
+        document.getElementById('breakingPopup').style.display = 'block';
+        currentIndex = (currentIndex + 1) % breakingNews.length;
+    }
+
+    function closePopup() {
+        document.getElementById('breakingPopup').style.display = 'none';
+    }
+
+    setTimeout(showPopup, 2000);
+    setInterval(() => {
+        closePopup();
+        setTimeout(showPopup, 500);
+    }, 8000);
+</script>
+<style>.lang-widget-wrap{display:inline-flex;align-items:center;position:relative}.lang-toggle-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid #e63946;color:#fff;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:500;cursor:pointer;transition:background 0.2s}.lang-toggle-btn:hover{background:#e63946}.lang-dropdown{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#1a1a2e;border:1px solid #e63946;border-radius:8px;padding:10px;z-index:9999;min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,0.5)}.lang-dropdown.open{display:block}.lang-quick-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}.lang-flag-btn{background:#16213e;border:1px solid #333;border-radius:5px;padding:3px 9px;font-size:12px;cursor:pointer;color:#ccc}.lang-flag-btn:hover,.lang-flag-btn.active{border-color:#e63946;background:#e63946;color:#fff}.lang-select-full{width:100%;background:#16213e;color:#fff;border:1px solid #444;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;outline:none}.goog-te-gadget, .goog-te-banner-frame, #goog-gt-tt { display:none !important; } body { top: 0 !important; }</style><script>function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:"ta",includedLanguages:"en,ta,hi,te,kn,ml,mr,bn,gu,pa,ur,fr,de,es,ar,zh-CN,ja,ko,ru,pt",autoDisplay:false},"google_translate_element")}const RTL_LANGS=["ar","ur"];let currentLang="ta";function toggleLangPanel(){document.getElementById("langDropdown").classList.toggle("open")}document.addEventListener("click",function(e){const wrap=document.getElementById("langWidgetWrap");if(wrap&&!wrap.contains(e.target))document.getElementById("langDropdown").classList.remove("open")});document.getElementById("langQuickRow").addEventListener("click",function(e){const btn=e.target.closest(".lang-flag-btn");if(btn)applyLanguage(btn.dataset.lang)});function applyLanguage(lang){if(!lang)return;if(lang==="ta"){document.cookie="googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";document.cookie="googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain="+window.location.hostname;currentLang="ta";document.getElementById("langActiveName").textContent="தமிழ்";document.getElementById("langSelectFull").value="ta";document.querySelectorAll("#langQuickRow .lang-flag-btn").forEach(b=>{b.classList.toggle("active",b.dataset.lang==="ta")});document.getElementById("langDropdown").classList.remove("open");window.location.reload();return;}if(lang===currentLang)return;currentLang=lang;const labels={ta:"தமிழ்",en:"English",hi:"हिन्दी",te:"తెలుగు",kn:"ಕನ್ನಡ",ml:"മലയാളം",ar:"العربية",zh:"中文",fr:"Français"};document.getElementById("langActiveName").textContent=labels[lang]||lang;document.getElementById("langSelectFull").value=lang;document.querySelectorAll("#langQuickRow .lang-flag-btn").forEach(b=>{b.classList.toggle("active",b.dataset.lang===lang)});document.documentElement.dir=RTL_LANGS.includes(lang)?"rtl":"ltr";document.documentElement.lang=lang;const select=document.querySelector(".goog-te-combo");if(select){select.value=lang==="zh"?"zh-CN":lang;select.dispatchEvent(new Event("change"))}document.getElementById("langDropdown").classList.remove("open")}</script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script></body>
+</html>

@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'blog/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .ticker-wrapper { overflow: hidden; width: 100%; }
+        .ticker-track {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: ticker-scroll 30s linear infinite;
+            width: max-content;
+        }
+        .ticker-track:hover { animation-play-state: paused; }
+        @keyframes ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-item {
+            color: white; font-size: 20px; font-weight: 600;
+            text-decoration: none; padding: 0 32px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .ticker-item::before { content: "★"; font-size: 20px; }
+        body.dark-mode { background-color: #121212 !important; color: #ffffff !important; }
+        body.dark-mode .card { background-color: #1e1e1e !important; border-color: #333 !important; color: #ffffff !important; }
+        body.dark-mode .text-muted { color: #aaaaaa !important; }
+        body.dark-mode footer { background-color: #000000 !important; }
+        body.dark-mode .form-control { background-color: #2a2a2a !important; color: #fff !important; border-color: #444 !important; }
+        .lang-widget-wrap{display:inline-flex;align-items:center;position:relative}
+        .lang-toggle-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid #e63946;color:#fff;border-radius:6px;padding:5px 12px;font-size:13px;font-weight:500;cursor:pointer;transition:background 0.2s}
+        .lang-toggle-btn:hover{background:#e63946}
+        .lang-dropdown{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#1a1a2e;border:1px solid #e63946;border-radius:8px;padding:10px;z-index:9999;min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+        .lang-dropdown.open{display:block}
+        .lang-quick-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+        .lang-flag-btn{background:#16213e;border:1px solid #333;border-radius:5px;padding:3px 9px;font-size:12px;cursor:pointer;color:#ccc}
+        .lang-flag-btn:hover,.lang-flag-btn.active{border-color:#e63946;background:#e63946;color:#fff}
+        .lang-select-full{width:100%;background:#16213e;color:#fff;border:1px solid #444;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;outline:none}
+        .goog-te-gadget, .goog-te-banner-frame, #goog-gt-tt { display:none !important; }
+        body { top: 0 !important; }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Header -->
+<header class="p-3 bg-dark text-white">
+    <div class="row align-items-center">
+        <div class="col">
+            <a class="text-decoration-none text-light" href="{% url 'blog:index' %}">
+                <h3 class="mb-0">📰 News Hub 2026</h3>
+            </a>
+        </div>
+        <div class="col">
+            <div class="d-flex justify-content-center gap-3">
+                <a class="text-light text-decoration-none" href="{% url 'blog:index' %}">Home</a>
+                <a class="text-light text-decoration-none" href="{% url 'blog:post_list' %}">All News</a>
+                <a class="text-light text-decoration-none" href="{% url 'blog:register' %}">Register</a>
+                <a href="{% url 'blog:login' %}" class="btn btn-outline-light btn-sm px-3">
+                    <i class="fa fa-sign-in-alt me-1"></i> Login
+                </a>
+                <a href="{% url 'blog:logout' %}" class="btn btn-outline-danger btn-sm px-3">
+                    <i class="fa fa-sign-out-alt me-1"></i> Logout
+                </a>
+                <div class="lang-widget-wrap" id="langWidgetWrap">
+                    <button class="lang-toggle-btn" onclick="toggleLangPanel()">🌐 <span id="langActiveName">Language</span> ▾</button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-quick-row" id="langQuickRow">
+                            <button class="lang-flag-btn active" data-lang="ta">தமிழ்</button>
+                            <button class="lang-flag-btn" data-lang="en">English</button>
+                            <button class="lang-flag-btn" data-lang="hi">हिन्दी</button>
+                            <button class="lang-flag-btn" data-lang="te">తెలుగు</button>
+                            <button class="lang-flag-btn" data-lang="ml">മലയാളം</button>
+                            <button class="lang-flag-btn" data-lang="kn">ಕನ್ನಡ</button>
+                            <button class="lang-flag-btn" data-lang="ar">عربية</button>
+                        </div>
+                        <select class="lang-select-full" id="langSelectFull" onchange="applyLanguage(this.value)">
+                            <option value="ta">தமிழ்</option>
+                            <option value="en">English</option>
+                            <option value="hi">हिन्दी</option>
+                            <option value="te">తెలుగు</option>
+                            <option value="ml">മലയാളം</option>
+                            <option value="ar">العربية</option>
+                            <option value="zh">中文</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="google_translate_element" style="display:none;"></div>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'blog:profile' %}" style="width:36px;height:36px;border-radius:50%;background:#e63946;color:white;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;text-decoration:none;">
+                    {{ request.user.username|slice:":2"|upper }}
+                </a>
+                {% endif %}
+                <button onclick="toggleDark()" class="btn btn-outline-warning btn-sm px-3" id="darkBtn">🌙 Dark</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Breaking News Ticker -->
+<div class="bg-danger text-white py-2 px-6">
+    <div class="container-fluid d-flex align-items-center">
+        <span class="badge bg-white text-danger py-6 fw-bold me-3 flex-shrink-0">BREAKING</span>
+        <div class="ticker-wrapper">
+            <div class="ticker-track">
+                {% for p in latest_posts %}
+                    <a href="{% url 'blog:detail' p.id %}" class="ticker-item">{{ p.title }}</a>
+                {% endfor %}
+                {% for p in latest_posts %}
+                    <a href="{% url 'blog:detail' p.id %}" class="ticker-item">{{ p.title }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="container my-4">
+    <div class="row">
+
+        <!-- Main Article -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm p-4">
+
+                <a href="{% url 'blog:index' %}" class="text-danger mb-3">← Back</a>
+
+                <h1>{{ post.title }}</h1>
+
+                <p class="text-muted small">
+                    {{ post.created_at|date:"d M Y, H:i" }}
+                </p>
+
+                <div class="mb-3">
+                    {% if post.category %}
+                        <span class="badge bg-danger">{{ post.category.name }}</span>
+                    {% endif %}
+                    <span class="text-muted">👁 {{ post.views }}</span>
+                </div>
+
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="img-fluid mb-3">
+                {% endif %}
+
+                <p>{{ post.content }}</p>
+
+                <!-- Copy Link -->
+                <button onclick="copyLink()" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-link"></i> Copy Link
+                </button>
+                <div id="copyMsg" style="display:none;" class="text-success mt-2 small">
+                    Link copied to clipboard!
+                </div>
+
+                <!-- Share Buttons -->
+                <div class="mt-3 border-top pt-3">
+                    <p class="fw-bold mb-2">Share this article:</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="#" onclick="shareWhatsApp(); return false;"
+                           class="btn btn-sm text-white"
+                           style="background-color: #25D366;">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ current_url|urlencode }}"
+                           target="_blank" class="btn btn-sm text-white"
+                           style="background-color: #1877F2;">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?text={{ post.title|urlencode }}&url={{ current_url|urlencode }}"
+                           target="_blank" class="btn btn-sm text-white"
+                           style="background-color: #000000;">
+                            <i class="fab fa-x-twitter"></i> Twitter
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="mt-5">
+                    <h5 style="border-left:5px solid red; padding-left:10px;">
+                        💬 Comments ({{ comments|length }})
+                    </h5>
+                    <hr>
+
+                    {% if user.is_authenticated %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.content.errors }}
+                        {{ form.content }}
+                        <br>
+                        <button class="btn btn-danger btn-sm mt-2">Post Comment</button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        Login to comment →
+                        <a href="{% url 'blog:login' %}">Login</a>
+                    </div>
+                    {% endif %}
+
+                    {% for comment in comments %}
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <strong>{{ comment.user.username }}</strong>
+                            <small class="text-muted float-end">
+                                {{ comment.created_at|date:"d M Y, H:i" }}
+                            </small>
+                            <p class="mt-2">{{ comment.content }}</p>
+                            <a href="{% url 'blog:like_comment' comment.id %}"
+                               class="btn btn-sm {% if comment.id in liked_ids %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                ❤️ {{ comment.likes.count }}
+                            </a>
+                            <a href="#" onclick="shareCommentWhatsApp('{{ comment.content|escapejs }}'); return false;"
+                               class="btn btn-sm text-white ms-1"
+                               style="background-color: #25D366;">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted mt-3">No comments yet...</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h5>Latest News</h5>
+                    <ul class="list-unstyled">
+                        {% for p in latest_posts %}
+                        <li>
+                            <a href="{% url 'blog:detail' p.id %}">{{ p.title }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light p-3 mt-4">
+    <div class="text-center">
+        <span>© 2026 News Hub. All rights reserved.</span>
+    </div>
+</footer>
+
+<!-- Hidden fields for share -->
+<input type="hidden" id="share-title" value="{{ post.title|escapejs }}">
+<input type="hidden" id="share-content" value="{{ post.content|truncatewords:20|escapejs }}">
+<input type="hidden" id="share-url" value="{{ current_url }}">
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    if(localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkBtn').textContent = '☀️ Light';
+    }
+    function toggleDark() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        document.getElementById('darkBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+    }
+
+    function copyLink() {
+        var url = document.getElementById('share-url').value;
+        navigator.clipboard.writeText(url).then(() => {
+            document.getElementById('copyMsg').style.display = 'block';
+            setTimeout(() => { document.getElementById('copyMsg').style.display = 'none'; }, 2000);
+        });
+    }
+
+    function shareWhatsApp() {
+        var title = document.getElementById('share-title').value;
+        var content = document.getElementById('share-content').value;
+        var url = document.getElementById('share-url').value;
+        var text = title + "\n\n" + content + "\n\nRead more: " + url;
+        window.open("https://wa.me/?text=" + encodeURIComponent(text), '_blank');
+    }
+
+    function shareCommentWhatsApp(commentText) {
+        var url = document.getElementById('share-url').value;
+        var text = commentText + "\n\nRead more: " + url;
+        window.open("https://wa.me/?text=" + encodeURIComponent(text), '_blank');
+    }
+
+    const RTL_LANGS = ["ar", "ur"];
+    let currentLang = "ta";
+
+    function toggleLangPanel() {
+        document.getElementById("langDropdown").classList.toggle("open");
+    }
+    document.addEventListener("click", function(e) {
+        const wrap = document.getElementById("langWidgetWrap");
+        if (wrap && !wrap.contains(e.target))
+            document.getElementById("langDropdown").classList.remove("open");
+    });
+    document.getElementById("langQuickRow").addEventListener("click", function(e) {
+        const btn = e.target.closest(".lang-flag-btn");
+        if (btn) applyLanguage(btn.dataset.lang);
+    });
+    function applyLanguage(lang) {
+        if (!lang || lang === currentLang) return;
+        currentLang = lang;
+        const labels = {
+            ta: "தமிழ்", en: "English", hi: "हिन्दी",
+            te: "తెలుగు", kn: "ಕನ್ನಡ", ml: "മലయാളം",
+            ar: "العربية", zh: "中文", fr: "Français"
+        };
+        document.getElementById("langActiveName").textContent = labels[lang] || lang;
+        document.getElementById("langSelectFull").value = lang;
+        document.querySelectorAll("#langQuickRow .lang-flag-btn").forEach(b => {
+            b.classList.toggle("active", b.dataset.lang === lang);
+        });
+        document.documentElement.dir = RTL_LANGS.includes(lang) ? "rtl" : "ltr";
+        document.documentElement.lang = lang;
+        const select = document.querySelector(".goog-te-combo");
+        if (select) {
+            select.value = lang === "zh" ? "zh-CN" : lang;
+            select.dispatchEvent(new Event("change"));
+        }
+        document.getElementById("langDropdown").classList.remove("open");
+    }
+
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: "en",
+            includedLanguages: "en,ta,hi,te,kn,ml,mr,bn,gu,pa,ur,fr,de,es,ar,zh-CN,ja,ko,ru,pt",
+            autoDisplay: false
+        }, "google_translate_element");
+    }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
