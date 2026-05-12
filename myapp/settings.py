@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-akx6b0vd$7l=qgt3(u5w2rl@&c=&hm#l)z4#1=wsxyj&c+#79$'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://awry-tuition-dingo.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = ['https://news-hub-jjaf.onrender.com/']
 
 INSTALLED_APPS = [
     'django.contrib.admin',

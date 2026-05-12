@@ -50,7 +50,7 @@ def detail(request, pk):
             return redirect('blog:detail', pk=pk)
 
     # Clean URL - tag params illama
-    post_url = "https://awry-tuition-dingo.ngrok-free.dev" + reverse('blog:detail', kwargs={'pk': pk})
+    post_url= 'https://news-hub-jjaf.onrender.com/' + reverse('blog:detail', kwargs={'pk': pk})
 
     return render(request, 'blog/detail.html', {
         'post': post,
