@@ -7,3 +7,4 @@ whitenoise==6.9.0
 psycopg2-binary==2.9.10
 requests==2.32.4
 PyJWT==2.12.1
+cryptography==44.0.3
