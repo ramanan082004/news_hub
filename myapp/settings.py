@@ -1,4 +1,6 @@
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,8 +37,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "myapp.urls"
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/blog/"
-LOGOUT_REDIRECT_URL = "/blog/"
+LOGIN_REDIRECT_URL = "/posts/"
+LOGOUT_REDIRECT_URL = "/posts/"
 
 TEMPLATES = [
     {
@@ -89,11 +91,14 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
-
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {"access_type": "online"},
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+        }
     }
 }
 
