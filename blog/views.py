@@ -3,15 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login ,logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import Post, Comment, CommentLike, UserProfile, BreakingNews
 from .forms import CommentForm
-
-
-
-    
-    # City parameter URL-la irundhu edukkom
 
 
 def get_client_ip(request):
@@ -20,27 +15,30 @@ def get_client_ip(request):
         return x_forwarded.split(',')[0]
     return request.META.get('REMOTE_ADDR')
 
+
 def index(request):
     query = request.GET.get('q', '')
     posts = Post.objects.filter(title__icontains=query) if query else Post.objects.all()
     breaking_posts = Post.objects.order_by('-created_at')[:10]
     breaking_news = BreakingNews.objects.order_by('-id')[:10]
 
-    # IP address eduthu city detect pannrom
     try:
         ip = get_client_ip(request)
-        # Local development-la 127.0.0.1 varum — Chennai default
         if ip == '127.0.0.1' or ip == '::1':
             city = 'Chennai'
         else:
-            # IP-la irundhu city detect
-            geo = requests.get(f'https://ipapi.co/{ip}/json/', timeout=5).json()
-            city = geo.get('city', 'Chennai')
-        
-        # Weather API call
+            try:
+                geo = requests.get(f'https://ipapi.co/{ip}/json/', timeout=5).json()
+                city = geo.get('city', 'Chennai')
+            except:
+                city = 'Chennai'
+
         api_key = "e3547251fd656762b57cae92ed03c564"
         url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
         weather = requests.get(url, timeout=5).json()
+
+        if weather.get('cod') != 200:
+            weather = None
     except:
         weather = None
 
@@ -51,6 +49,8 @@ def index(request):
         'breaking_news': breaking_news,
         'weather': weather,
     })
+
+
 def detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.views += 1
@@ -80,8 +80,7 @@ def detail(request, pk):
             comment.save()
             return redirect('blog:detail', pk=pk)
 
-    # Clean URL - tag params illama
-    post_url= 'https://news-hub-jjaf.onrender.com/' + reverse('blog:detail', kwargs={'pk': pk})
+    post_url = 'https://news-hub-jjaf.onrender.com/' + reverse('blog:detail', kwargs={'pk': pk})
 
     return render(request, 'blog/detail.html', {
         'post': post,
@@ -92,6 +91,7 @@ def detail(request, pk):
         'liked_ids': liked_ids,
     })
 
+
 def register(request):
     form = UserCreationForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -100,18 +100,23 @@ def register(request):
         return redirect('blog:index')
     return render(request, 'blog/register.html', {'form': form})
 
+
 def old_url_redirect(request):
     return redirect(reverse('blog:new_page_url'))
 
+
 def new_url_view(request):
     return HttpResponse("this the new URL")
+
 
 def post_list(request):
     posts = Post.objects.all()
     return render(request, 'blog/post_list.html', {'posts': posts})
 
+
 def some_view(request):
     return render(request, 'blog/post_home.html')
+
 
 def copy_post(request, pk):
     original = get_object_or_404(Post, pk=pk)
@@ -122,12 +127,14 @@ def copy_post(request, pk):
     )
     return redirect('blog:detail', pk=pk)
 
+
 def download_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
     content = f"{post.title}\n\n{post.content}"
     response = HttpResponse(content, content_type='text/plain')
     response['Content-Disposition'] = f'attachment; filename="{post.title}.txt"'
     return response
+
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -143,9 +150,11 @@ def login_view(request):
             return render(request, 'blog/login.html', {'error': 'Invalid credentials'})
     return render(request, 'blog/login.html')
 
+
 def logout_view(request):
     logout(request)
     return redirect('blog:index')
+
 
 @login_required(login_url='/login/')
 def profile_view(request):
@@ -157,6 +166,7 @@ def profile_view(request):
         profile.save()
         return redirect('blog:profile')
     return render(request, 'blog/profile.html', {'profile': profile})
+
 
 def like_comment(request, comment_id):
     if not request.user.is_authenticated:
