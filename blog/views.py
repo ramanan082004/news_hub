@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.urls import reverse
@@ -8,18 +9,48 @@ from .models import Post, Comment, CommentLike, UserProfile, BreakingNews
 from .forms import CommentForm
 
 
+
+    
+    # City parameter URL-la irundhu edukkom
+
+
+def get_client_ip(request):
+    x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded:
+        return x_forwarded.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
+
 def index(request):
     query = request.GET.get('q', '')
     posts = Post.objects.filter(title__icontains=query) if query else Post.objects.all()
     breaking_posts = Post.objects.order_by('-created_at')[:10]
     breaking_news = BreakingNews.objects.order_by('-id')[:10]
+
+    # IP address eduthu city detect pannrom
+    try:
+        ip = get_client_ip(request)
+        # Local development-la 127.0.0.1 varum — Chennai default
+        if ip == '127.0.0.1' or ip == '::1':
+            city = 'Chennai'
+        else:
+            # IP-la irundhu city detect
+            geo = requests.get(f'https://ipapi.co/{ip}/json/', timeout=5).json()
+            city = geo.get('city', 'Chennai')
+        
+        # Weather API call
+        api_key = "e3547251fd656762b57cae92ed03c564"
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+        weather = requests.get(url, timeout=5).json()
+    except:
+        weather = None
+
     return render(request, 'blog/index.html', {
         'posts': posts,
         'query': query,
         'breaking_posts': breaking_posts,
         'breaking_news': breaking_news,
+        'weather': weather,
     })
-
 def detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.views += 1
