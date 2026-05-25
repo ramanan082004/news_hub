@@ -1,40 +1,60 @@
 {% extends 'blog/base.html' %}
 {% load static %}
+
 {% block title %}All News{% endblock %}
+
+{% block extra_css %}
+<style>
+    .news-item { border-radius: 10px; overflow: hidden; transition: transform 0.2s; }
+    .news-item:hover { transform: translateY(-2px); }
+    .news-item img { width: 200px; height: 120px; object-fit: cover; flex-shrink: 0; }
+    @media (max-width: 576px) {
+        .news-item img { width: 110px; height: 80px; }
+    }
+    .news-title { font-size: 15px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    .news-excerpt { font-size: 13px; color: #555; }
+    body.dark-mode .news-excerpt { color: #aaa; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container my-4">
-    <h2 class="border-start border-danger border-4 ps-2 mb-4">All News</h2>
-    <div class="row">
+<div class="container-fluid mt-3 px-3">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+        <h2 style="border-left:6px solid #d32f2f; padding-left:10px; font-size:20px; margin:0;">All News</h2>
+        <form method="GET" action="{% url 'blog:post_list' %}" class="w-100" style="max-width:320px;">
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control" placeholder="Search news..." name="q" value="{{ query|default:'' }}">
+                <button class="btn btn-danger" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex flex-column gap-3">
         {% for post in posts %}
-        <div class="col-12 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-2">
-                            {% if post.image %}
-                                <img src="{{ post.image.url }}" class="img-fluid rounded" alt="{{ post.title }}" style="width:100%; height:90px; object-fit:cover;">
-                            {% else %}
-                                <img src="https://via.placeholder.com/150" class="img-fluid rounded" alt="news" style="width:100%; height:90px; object-fit:cover;">
-                            {% endif %}
-                        </div>
-                        <div class="col-md-10">
-                            <h5 class="fw-bold">{{ post.title }}</h5>
-                            <p class="text-muted mb-1">{{ post.content|truncatewords:20 }}</p>
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3"></i>
-                                {{ post.created_at|date:"d M Y, H:i" }}
-                            </small>
-                            <div class="mt-2">
-                                <a href="{% url 'blog:detail' post.id %}" class="text-danger fw-bold text-decoration-none">Read More →</a>
-                            </div>
-                        </div>
+        <div class="card news-item shadow-sm">
+            <div class="d-flex">
+                {% if post.image %}
+                <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                {% else %}
+                <img src="https://via.placeholder.com/200x120?text=No+Image" alt="no image">
+                {% endif %}
+                <div class="card-body py-2 px-3">
+                    {% if post.category %}
+                    <span class="badge bg-danger mb-1" style="font-size:10px;">{{ post.category.name }}</span>
+                    {% endif %}
+                    <div class="news-title">{{ post.title }}</div>
+                    <div class="news-excerpt">{{ post.content|truncatewords:15 }}</div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ post.created_at|date:"d M Y, H:i" }}</small>
+                        <a href="{% url 'blog:detail' post.id %}" class="text-danger fw-bold text-decoration-none" style="font-size:13px;">Read More →</a>
                     </div>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="text-center py-5 text-muted">
-            <h5>இன்னும் news இல்லை. Admin panel-ல் add பண்ணுங்க!</h5>
+            <h5>இன்னும் news இல்லை.</h5>
         </div>
         {% endfor %}
     </div>
