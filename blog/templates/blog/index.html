@@ -226,21 +226,38 @@
 <script>
 const apiKey = "e3547251fd656762b57cae92ed03c564";
 
-navigator.geolocation.getCurrentPosition(function(pos) {
-    const lat = pos.coords.latitude;
-    const lon = pos.coords.longitude;
-    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`)
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('weatherCity').textContent = data.name;
-        document.getElementById('weatherTemp').textContent = Math.round(data.main.temp);
-        document.getElementById('weatherDesc').textContent = data.weather[0].description;
-        document.getElementById('weatherHum').textContent = data.main.humidity;
-      });
-}, function() {
-    // Location deny pannina — Chennai default
-    console.log("Location access denied");
-});
+function updateWeather() {
+    if (!navigator.geolocation) return;
+    
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`)
+          .then(res => res.json())
+          .then(data => {
+            document.getElementById('weatherCity').textContent = data.name;
+            document.getElementById('weatherTemp').textContent = Math.round(data.main.temp);
+            document.getElementById('weatherDesc').textContent = data.weather[0].description;
+            document.getElementById('weatherHum').textContent = data.main.humidity;
+            // City-a save pannrom
+            localStorage.setItem('weatherCity', data.name);
+            localStorage.setItem('weatherTemp', Math.round(data.main.temp));
+            localStorage.setItem('weatherDesc', data.weather[0].description);
+            localStorage.setItem('weatherHum', data.main.humidity);
+          });
+    }, function() {
+        // Location deny — saved data use pannrom
+        const city = localStorage.getItem('weatherCity');
+        if (city) {
+            document.getElementById('weatherCity').textContent = city;
+            document.getElementById('weatherTemp').textContent = localStorage.getItem('weatherTemp');
+            document.getElementById('weatherDesc').textContent = localStorage.getItem('weatherDesc');
+            document.getElementById('weatherHum').textContent = localStorage.getItem('weatherHum');
+        }
+    });
+}
+
+updateWeather();
 </script>
 
 <div class="bg-danger text-white py-2 px-3">
