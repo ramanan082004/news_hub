@@ -308,7 +308,13 @@ updateWeather();
                     <p class="news-card-excerpt">{{ post.content|truncatewords:15 }}</p>
                     <div class="d-flex justify-content-between align-items-center mt-2">
                         <span class="news-card-meta">{{ post.created_at|date:"d M Y" }}</span>
-                        <a href="{% url 'blog:detail' post.id %}?tag={{ post.tag|default_if_none:'' }}" class="text-danger fw-bold text-decoration-none" style="font-size:13px;">Read More →</a>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="like-btn" data-id="{{ post.id }}" style="background:none; border:none; cursor:pointer; font-size:18px;">
+                                {% if request.user in post.likes.all %}❤️{% else %}🤍{% endif %}
+                                <span class="like-count">{{ post.total_likes }}</span>
+                            </button>
+                            <a href="{% url 'blog:detail' post.id %}?tag={{ post.tag|default_if_none:'' }}" class="text-danger fw-bold text-decoration-none" style="font-size:13px;">Read More →</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -324,10 +330,29 @@ updateWeather();
         {% endfor %}
     </div>
 </div>
-
-<footer class="bg-dark text-light p-3 mt-5">
-    <div class="text-center">
-        <span>© 2026 News Hub. All rights reserved.</span>
+<footer class="bg-dark text-light mt-5 py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h5>📰 News Hub 2026</h5>
+                <p style="font-size:13px; color:#aaa;">Tamil Nadu's trusted news source.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h6>Quick Links</h6>
+                <ul class="list-unstyled" style="font-size:13px;">
+                    <li><a href="{% url 'blog:index' %}" class="text-light text-decoration-none">Home</a></li>
+                    <li><a href="{% url 'blog:post_list' %}" class="text-light text-decoration-none">All News</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h6>Contact</h6>
+                <p style="font-size:13px; color:#aaa;">📧 newshub2026@gmail.com</p>
+            </div>
+        </div>
+        <hr style="border-color:#444;">
+        <div class="text-center" style="font-size:13px; color:#aaa;">
+            © 2026 News Hub. All rights reserved.
+        </div>
     </div>
 </footer>
 
@@ -421,6 +446,26 @@ updateWeather();
             autoDisplay: false
         }, "google_translate_element");
     }
+</script>
+
+<script>
+document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const postId = this.dataset.id;
+        fetch(`/post/${postId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.querySelector('.like-count').textContent = data.total;
+            this.innerHTML = (data.liked ? '❤️' : '🤍') + ` <span class="like-count">${data.total}</span>`;
+        });
+    });
+});
 </script>
 </body>
 </html>

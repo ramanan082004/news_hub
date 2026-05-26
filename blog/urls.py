@@ -18,4 +18,5 @@ urlpatterns = [
     path('old_url/', views.old_url_redirect, name='old_url'),
     path('new_something_url/', views.new_url_view, name='new_page_url'),
     path('comment/<int:comment_id>/like/', views.like_comment, name='like_comment'),
+    path('post/<int:post_id>/like/', views.like_post, name='like_post'),
 ]

@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
+
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Post, Comment, CommentLike, UserProfile, BreakingNews
 from .forms import CommentForm
@@ -154,6 +156,18 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('blog:index')
+
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+    return JsonResponse({'liked': liked, 'total': post.total_likes()})
 
 
 @login_required(login_url='/login/')
