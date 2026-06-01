@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "blog",
+    "corsheaders",
+    "tts",
 ]
 
 MIDDLEWARE = [
@@ -34,7 +36,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-   
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "myapp.urls"
@@ -86,6 +88,8 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+CORS_ALLOW_ALL_ORIGINS = True 
 
 SITE_ID = 1
 

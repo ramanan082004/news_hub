@@ -24,6 +24,38 @@
     }
     .ticker-item::before { content: "★"; font-size: 20px; }
     body.dark-mode footer { background-color: #000000 !important; }
+
+    .goog-te-gadget, .goog-te-banner-frame, #goog-gt-tt { display:none !important; }
+    body { top: 0 !important; }
+
+    .lang-widget-wrap { display:inline-flex; align-items:center; position:relative; }
+    .lang-toggle-btn {
+        display:flex; align-items:center; gap:6px;
+        background:transparent; border:1px solid #e63946;
+        color:#fff; border-radius:6px; padding:5px 12px;
+        font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s;
+    }
+    .lang-toggle-btn:hover { background:#e63946; }
+    .lang-dropdown {
+        display:none; position:absolute; top:calc(100% + 6px); right:0;
+        background:#1a1a2e; border:1px solid #e63946; border-radius:8px;
+        padding:10px; z-index:9999; min-width:260px;
+        box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    }
+    .lang-dropdown.open { display:block; }
+    .lang-quick-row { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
+    .lang-flag-btn {
+        background:#16213e; border:1px solid #333; border-radius:5px;
+        padding:3px 9px; font-size:12px; cursor:pointer; color:#ccc;
+    }
+    .lang-flag-btn:hover, .lang-flag-btn.active {
+        border-color:#e63946; background:#e63946; color:#fff;
+    }
+    .lang-select-full {
+        width:100%; background:#16213e; color:#fff;
+        border:1px solid #444; border-radius:6px;
+        padding:6px 10px; font-size:13px; cursor:pointer; outline:none;
+    }
 </style>
 
 <input type="hidden" id="share-title" value="{{ post.title|escapejs }}">
@@ -52,6 +84,36 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-sm p-4">
+
+                <!-- Language Widget -->
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="lang-widget-wrap" id="langWidgetWrap">
+                        <button class="lang-toggle-btn" onclick="toggleLangPanel()">🌐 <span id="langActiveName">Language</span> ▾</button>
+                        <div class="lang-dropdown" id="langDropdown">
+                            <div class="lang-quick-row" id="langQuickRow">
+                                <button class="lang-flag-btn active" data-lang="ta">தமிழ்</button>
+                                <button class="lang-flag-btn" data-lang="en">English</button>
+                                <button class="lang-flag-btn" data-lang="hi">हिन्दी</button>
+                                <button class="lang-flag-btn" data-lang="te">తెలుగు</button>
+                                <button class="lang-flag-btn" data-lang="ml">മലയാളം</button>
+                                <button class="lang-flag-btn" data-lang="kn">ಕನ್ನಡ</button>
+                                <button class="lang-flag-btn" data-lang="ar">عربية</button>
+                            </div>
+                            <select class="lang-select-full" id="langSelectFull" onchange="applyLanguage(this.value)">
+                                <option value="ta">தமிழ்</option>
+                                <option value="en">English</option>
+                                <option value="hi">हिन्दी</option>
+                                <option value="te">తెలుగు</option>
+                                <option value="ml">മലയാളം</option>
+                                <option value="ar">العربية</option>
+                                <option value="zh">中文</option>
+                                <option value="fr">Français</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="google_translate_element" style="display:none;"></div>
+                </div>
+
                 <a href="{% url 'blog:index' %}" class="text-danger mb-3">← Back</a>
                 <h1>{{ post.title }}</h1>
                 <p class="text-muted small">{{ post.created_at|date:"d M Y, H:i" }}</p>
@@ -65,10 +127,26 @@
                     <img src="{{ post.image.url }}" class="img-fluid mb-3">
                 {% endif %}
                 <p>{{ post.content }}</p>
-                <button onclick="copyLink()" class="btn btn-sm btn-outline-secondary">
+
+                <!-- TTS Player -->
+                <div class="mt-3 p-3 rounded" style="background:#1a1a2e; border-left: 4px solid #e63946;">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="text-white fw-bold">🎙️ கேக்கணும்:</span>
+                        <button id="ttsBtn" onclick="loadTTS()" class="btn btn-danger btn-sm">▶ தமிழில் கேக்கணும்</button>
+                        <select id="ttsLang" onchange="resetTTS()" class="form-select form-select-sm w-auto" style="background:#2a2a3e; color:white; border-color:#555;">
+                            <option value="ta">தமிழ் 🇮🇳</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <audio id="ttsAudio" controls style="display:none; width:100%; margin-top:10px;"></audio>
+                    <p id="ttsStatus" class="text-white-50 small mt-2 mb-0"></p>
+                </div>
+
+                <button onclick="copyLink()" class="btn btn-sm btn-outline-secondary mt-3">
                     <i class="fas fa-link"></i> Copy Link
                 </button>
                 <div id="copyMsg" style="display:none;" class="text-success mt-2 small">Link copied!</div>
+
                 <div class="mt-3 border-top pt-3">
                     <p class="fw-bold mb-2">Share this article:</p>
                     <div class="d-flex gap-2 flex-wrap">
@@ -83,6 +161,7 @@
                         </a>
                     </div>
                 </div>
+
                 <div class="mt-5">
                     <h5 style="border-left:5px solid red; padding-left:10px;">💬 Comments ({{ comments|length }})</h5>
                     <hr>
@@ -117,6 +196,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-lg-4">
             <div class="card shadow-sm mt-3">
                 <div class="card-body">
@@ -133,23 +213,120 @@
 </div>
 
 <script>
-    function copyLink() {
-        var url = document.getElementById('share-url').value;
-        navigator.clipboard.writeText(url).then(() => {
-            document.getElementById('copyMsg').style.display = 'block';
-            setTimeout(() => { document.getElementById('copyMsg').style.display = 'none'; }, 2000);
+const ARTICLE_ID = {{ post.id }};
+const ARTICLE_TEXT = `{{ post.title|escapejs }}. {{ post.content|escapejs|truncatechars:2000 }}`;
+
+async function loadTTS() {
+    const btn = document.getElementById('ttsBtn');
+    const status = document.getElementById('ttsStatus');
+    const audio = document.getElementById('ttsAudio');
+    const lang = document.getElementById('ttsLang').value;
+    btn.disabled = true;
+    status.textContent = '⏳ Audio generate ஆகுது... சில நொடிகள் பொறுங்க...';
+    try {
+        const res = await fetch('/api/tts/generate/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({article_id: ARTICLE_ID, text: ARTICLE_TEXT, lang: lang})
         });
+        const data = await res.json();
+        if (data.success) {
+            audio.src = data.audio_url;
+            audio.style.display = 'block';
+            audio.play();
+            status.textContent = data.cached ? '✅ Cached audio' : '✅ Ready!';
+            btn.textContent = '🔄 Regenerate';
+        } else {
+            status.textContent = '❌ Error: ' + data.error;
+        }
+    } catch(err) {
+        status.textContent = '❌ Server error. Try again.';
     }
-    function shareWhatsApp() {
-        var title = document.getElementById('share-title').value;
-        var content = document.getElementById('share-content').value;
-        var url = document.getElementById('share-url').value;
-        window.open("https://wa.me/?text=" + encodeURIComponent(title + "\n\n" + content + "\n\nRead more: " + url), '_blank');
+    btn.disabled = false;
+}
+
+function resetTTS() {
+    const audio = document.getElementById('ttsAudio');
+    audio.pause();
+    audio.src = '';
+    audio.style.display = 'none';
+    document.getElementById('ttsStatus').textContent = '';
+    document.getElementById('ttsBtn').textContent = '▶ தமிழில் கேக்கணும்';
+}
+
+function copyLink() {
+    var url = document.getElementById('share-url').value;
+    navigator.clipboard.writeText(url).then(() => {
+        document.getElementById('copyMsg').style.display = 'block';
+        setTimeout(() => { document.getElementById('copyMsg').style.display = 'none'; }, 2000);
+    });
+}
+
+function shareWhatsApp() {
+    var title = document.getElementById('share-title').value;
+    var content = document.getElementById('share-content').value;
+    var url = document.getElementById('share-url').value;
+    window.open("https://wa.me/?text=" + encodeURIComponent(title + "\n\n" + content + "\n\nRead more: " + url), '_blank');
+}
+
+function shareCommentWhatsApp(commentText) {
+    var url = document.getElementById('share-url').value;
+    window.open("https://wa.me/?text=" + encodeURIComponent(commentText + "\n\nRead more: " + url), '_blank');
+}
+
+// Language Widget
+const RTL_LANGS = ["ar", "ur"];
+let currentLang = "ta";
+
+function toggleLangPanel() {
+    document.getElementById("langDropdown").classList.toggle("open");
+}
+
+document.addEventListener("click", function(e) {
+    const wrap = document.getElementById("langWidgetWrap");
+    if (wrap && !wrap.contains(e.target))
+        document.getElementById("langDropdown").classList.remove("open");
+});
+
+document.getElementById("langQuickRow").addEventListener("click", function(e) {
+    const btn = e.target.closest(".lang-flag-btn");
+    if (btn) applyLanguage(btn.dataset.lang);
+});
+
+function applyLanguage(lang) {
+    if (!lang || lang === currentLang) return;
+    currentLang = lang;
+    const labels = {
+        ta:"தமிழ்", en:"English", hi:"हिन्दी",
+        te:"తెలుగు", kn:"ಕನ್ನಡ", ml:"മലയാളം",
+        ar:"العربية", zh:"中文", fr:"Français"
+    };
+    document.getElementById("langActiveName").textContent = labels[lang] || lang;
+    document.getElementById("langSelectFull").value = lang;
+    document.querySelectorAll("#langQuickRow .lang-flag-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.lang === lang);
+    });
+    document.documentElement.dir = RTL_LANGS.includes(lang) ? "rtl" : "ltr";
+    document.documentElement.lang = lang;
+    const select = document.querySelector(".goog-te-combo");
+    if (select) {
+        select.value = lang === "zh" ? "zh-CN" : lang;
+        select.dispatchEvent(new Event("change"));
     }
-    function shareCommentWhatsApp(commentText) {
-        var url = document.getElementById('share-url').value;
-        window.open("https://wa.me/?text=" + encodeURIComponent(commentText + "\n\nRead more: " + url), '_blank');
-    }
+    document.getElementById("langDropdown").classList.remove("open");
+}
+</script>
+
+<!-- Google Translate -->
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: "en",
+        includedLanguages: "en,ta,hi,te,kn,ml,mr,bn,gu,pa,ur,fr,de,es,ar,zh-CN,ja,ko,ru,pt",
+        autoDisplay: false
+    }, "google_translate_element");
+}
 </script>
 
 {% endblock %}
