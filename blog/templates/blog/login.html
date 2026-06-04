@@ -3,28 +3,25 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 <div class="container mt-5" style="max-width:400px;">
-  <div class="card p-4 shadow-sm">
-    <h4 class="mb-3 text-center">Login</h4>
+<div class="card p-4 shadow-sm">
+<h4 class="mb-3 text-center">Login</h4>
     {% if error %}
-      <div class="alert alert-danger">{{ error }}</div>
+<div class="alert alert-danger">{{ error }}</div>
     {% endif %}
-    <form method="POST">
+<form method="POST">
       {% csrf_token %}
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input type="text" name="username" class="form-control" placeholder="Username உள்ளிடுங்கள்" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" placeholder="Password உள்ளிடுங்கள்" required>
-      </div>
-      <button type="submit" class="btn btn-danger w-100">Login</button>
-    </form>
-    <hr>
-    <a href="/accounts/google/login/" class="btn btn-primary w-100">🔵 Login with Google</a>
-    <div class="text-center mt-3">
-      <small>Account இல்லையா? <a href="{% url 'blog:register' %}" style="color:#e63946;">Register செய்யுங்கள்</a></small>
-    </div>
-  </div>
+<div class="mb-3">
+<label class="form-label">Username</label>
+<input type="text" name="username" class="form-control" placeholder="Username உள்ளிடுங்கள்" required>
+</div>
+<div class="mb-3">
+<label class="form-label">Password</label>
+<input type="password" name="password" class="form-control" placeholder="Password உள்ளிடுங்கள்" required>
+</div>
+<button type="submit" class="btn btn-danger w-100">Login</button>
+</form>
+<hr>
+<a href="/accounts/google/login/" class="btn btn-primary w-100">🔵 Login with Google</a>
+</div>
 </div>
 {% endblock %}
