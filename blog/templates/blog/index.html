@@ -163,16 +163,16 @@
 
 <header class="site-header">
     <div class="header-top">
-        <div class="header-brand">
-            <a href="{% url 'blog:index' %}"><h3>📰 News Hub 2026</h3></a>
-        </div>
+        <div class="header-brand" style="display:flex; align-items:center; gap:12px;">
+    <a href="{% url 'blog:index' %}"><h3>📰 News Hub 2026</h3></a>
+    <span id="liveDateTime" style="color:white; font-size:13px; font-weight:500; background:rgba(255,255,255,0.1); padding:5px 12px; border-radius:6px; white-space:nowrap;"></span>
+</div>
         <button class="hamburger-btn" onclick="toggleNav()" aria-label="Menu">
             <i class="fa fa-bars"></i>
         </button>
         <nav class="nav-menu" id="navMenu">
             <a class="text-light text-decoration-none px-1" href="{% url 'blog:index' %}">Home</a>
             <a class="text-light text-decoration-none px-1" href="{% url 'blog:post_list' %}">All News</a>
-            <a class="text-light text-decoration-none px-1" href="{% url 'blog:register' %}">Register</a>
             <a href="{% url 'blog:login' %}" class="btn btn-outline-light btn-sm px-3">
                 <i class="fa fa-sign-in-alt me-1"></i> Login
             </a>
@@ -209,6 +209,10 @@
                 {{ request.user.username|slice:":2"|upper }}
             </a>
             {% endif %}
+
+             
+
+
             <button onclick="toggleDark()" class="btn btn-outline-warning btn-sm px-3" id="darkBtn">🌙 Dark</button>
         </nav>
     </div>
@@ -367,6 +371,8 @@ updateWeather();
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+
+   
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
         document.getElementById('darkBtn').textContent = '☀️ Light';
@@ -466,6 +472,24 @@ document.querySelectorAll('.like-btn').forEach(btn => {
         });
     });
 });
+</script>
+<script>
+function updateDateTime() {
+    const now = new Date();
+    const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+    const formatted = now.toLocaleString('en-IN', options);
+    document.getElementById('liveDateTime').textContent = '🕐 ' + formatted;
+}
+updateDateTime();
+setInterval(updateDateTime, 1000);
 </script>
 </body>
 </html>

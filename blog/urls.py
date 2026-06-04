@@ -10,7 +10,7 @@ urlpatterns = [
     path('post/<int:pk>/download/', views.download_post, name='download_post'),  # ✅ post_id → pk
     path('post/<int:pk>/copy/', views.copy_post, name='copy_post'),
     path('post/', views.some_view, name='post_home'),
-    path('register/', views.register, name='register'),
+   
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     
