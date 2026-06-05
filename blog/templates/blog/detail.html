@@ -82,7 +82,7 @@
 <!-- Content -->
 <div class="container my-4">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <div class="card shadow-sm p-4">
 
                 <!-- Language Widget -->
@@ -197,18 +197,7 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm mt-3">
-                <div class="card-body">
-                    <h5>Latest News</h5>
-                    <ul class="list-unstyled">
-                        {% for p in latest_posts %}
-                        <li><a href="{% url 'blog:detail' p.id %}">{{ p.title }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
+        
     </div>
 </div>
 

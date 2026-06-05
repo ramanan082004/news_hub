@@ -298,7 +298,8 @@ updateWeather();
     <div class="news-grid">
         {% for post in posts %}
         <div>
-            <div class="card news-card">
+            <a href="{% url 'blog:detail' post.id %}" style="text-decoration:none; color:inherit; display:block;">
+        <div class="card news-card">
                 {% if post.image %}
                     <img src="{{ post.image.url }}" class="news-card-img" alt="{{ post.title }}">
                 {% else %}
@@ -322,6 +323,7 @@ updateWeather();
                     </div>
                 </div>
             </div>
+            </a>
         </div>
         {% empty %}
         <div class="text-center py-5 text-muted" style="grid-column:1/-1;">
